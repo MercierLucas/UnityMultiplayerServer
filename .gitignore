@@ -1,0 +1,13 @@
+## FOLDERS
+.vscode
+Assets/Scenes
+Logs/
+Packages/
+UserSettings
+
+## UNITY
+*.meta
+
+## C#
+*.csproj
+*.sln
