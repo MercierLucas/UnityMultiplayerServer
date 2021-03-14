@@ -14,5 +14,11 @@ namespace Server
         {
             Logs.Print("New client");
         }
+
+        public void ReceiveEntity(DataStreamReader reader)
+        {
+            NetMessage_Entity message = new NetMessage_Entity(reader);
+            server.entityManager.ReceiveEntity(message.Entity);
+        }
     }
 }

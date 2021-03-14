@@ -12,15 +12,18 @@ namespace Server
         #region CONSTS
         private const int PORT = 5522;
         private const int MAX_CLIENTS = 4;
+        private const int TICKS_PER_SECONDS = 30; 
         
         #endregion
 
+        private float updateTimer;
+        private float lastUpdate;
         public NetworkDriver driver;
-        protected NativeList<NetworkConnection> connections;
+        private NativeList<NetworkConnection> connections;
         protected Dictionary<int, NetworkConnection> players;
-
         private NetMessageHandlerManager netMessageHandlerManager;
         private MessageSender messageSender;
+        public EntityManager entityManager;
 
         #if UNITY_EDITOR
         private void Start(){Init();}
@@ -30,22 +33,27 @@ namespace Server
 
         public virtual void Init()
         {
+            updateTimer = 1/TICKS_PER_SECONDS;
+            lastUpdate = Time.time;
+
             driver =  NetworkDriver.Create();
             NetworkEndPoint endPoint = NetworkEndPoint.AnyIpv4;     // Allow anybody to connect to us
             endPoint.Port = PORT;
 
             netMessageHandlerManager = new NetMessageHandlerManager(this);
             messageSender = new MessageSender(this);
+            entityManager = new EntityManager();
             players = new Dictionary<int, NetworkConnection>();
 
             if(driver.Bind(endPoint) != 0)
             {
                 Logs.Error($"Error while binding to {PORT}");
+                Shutdown();
             }
             else
             {
                 driver.Listen();
-                Logs.Print($"Server running at port {PORT}");
+                Logs.Print($"Server running at port {PORT} with {TICKS_PER_SECONDS} ticks/s");
             }
 
             connections = new NativeList<NetworkConnection>(MAX_CLIENTS, Allocator.Persistent);
@@ -53,10 +61,17 @@ namespace Server
 
         public virtual void UpdateServer()
         {
-            driver.ScheduleUpdate().Complete();         // job is complete so unlock thread
-            CleanupConnections();
-            AcceptNewConnections();
-            UpdateMessagePump();
+            if(Time.time - lastUpdate > updateTimer)
+            {
+                driver.ScheduleUpdate().Complete();         // job is complete so unlock thread
+                CleanupConnections();
+                AcceptNewConnections();
+                UpdateMessagePump();
+
+                messageSender.PropagateEntities(entityManager.Entities);
+
+                lastUpdate = Time.time;
+            }
         }
 
         private void CleanupConnections()
@@ -92,12 +107,7 @@ namespace Server
                 NetworkEvent.Type cmd;
                 while((cmd = driver.PopEventForConnection(connections[i], out stream)) != NetworkEvent.Type.Empty)
                 {
-                    if(cmd == NetworkEvent.Type.Connect)
-                    {
-                        Logs.Print("TEST");
-                        //NewClientConnect(connections[i]);
-                    }
-                    else if(cmd == NetworkEvent.Type.Data)
+                    if(cmd == NetworkEvent.Type.Data)
                     {
                         netMessageHandlerManager.OnMessageReceived(stream);
                     }
@@ -115,13 +125,17 @@ namespace Server
             int uid = GetNextUID();
             players.Add(uid,connection);
             messageSender.SendToClient(new NetMessage_JoinServer(uid),connection);
+            //entityManager.ReceiveEntity(new Entity(uid, EntityType.player));
             Logs.Print($"New client joined with id {uid}");
         }
 
         public int GetNextUID()
         {
             if (players.Count == 0) return 0;
-            return players.Keys.Max() + 1;
+            if (entityManager.Entities.Count == 0)
+                return players.Keys.Max() + 1;
+            
+            return Mathf.Max((int)players.Keys.Max(), (int)entityManager.Entities.Keys.Max())+1;
         }
 
         public virtual void Shutdown()
@@ -129,6 +143,15 @@ namespace Server
             driver.Dispose();
             connections.Dispose();
         }
-    }
 
+        #region PROPERTIES
+        public NativeList<NetworkConnection> Connections
+        {
+            get
+            {
+                return connections;
+            }
+        }
+        #endregion
+    }
 }

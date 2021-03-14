@@ -19,7 +19,7 @@ public class NetMessage_Entity : NetMessage
 
     public NetMessage_Entity(Entity entity)
     {
-        Code = OpCode.PLAYER_JOIN;
+        Code = OpCode.ENTITY;
         Entity = entity;
     }
 
@@ -60,12 +60,12 @@ public class NetMessage_Entity : NetMessage
     #region Deserializer
     public override void Deserialize(DataStreamReader reader)
     {
-        Debug.Log(reader.Length);
         int uid = reader.ReadInt();
         EntityType type = (EntityType)reader.ReadByte();
         Entity = new Entity(uid, type);
 
         EntityFlag dirty = (EntityFlag)reader.ReadByte();
+
         if(dirty.HasFlag(EntityFlag.position)) DeserializePosition(ref reader);
         if(dirty.HasFlag(EntityFlag.visual)) DeserializeVisual(ref reader);
     }

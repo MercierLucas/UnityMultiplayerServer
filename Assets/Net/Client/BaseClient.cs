@@ -10,17 +10,21 @@ namespace Client
         public NetworkDriver driver;
         protected NetworkConnection serverConnection;
         protected NetMessageHandlerManager messageHandler;
+        [SerializeField] public EntitiesManager entitiesManager {get; private set;}
+        [SerializeField] public PlayerManager playerManager {get; private set;}
 
-        #if UNITY_EDITOR
+        //#if UNITY_EDITOR
         private void Start(){Init();}
         private void Update(){UpdateClient();}
         private void OnDestroy(){Shutdown();}
-        #endif
+        //#endif
 
         public virtual void Init()
         {
             serverConnection = default(NetworkConnection);
-            messageHandler = new NetMessageHandlerManager();
+            messageHandler = new NetMessageHandlerManager(this);
+            entitiesManager = GetComponent<EntitiesManager>();
+            playerManager = GetComponent<PlayerManager>();
             driver =  NetworkDriver.Create();
             NetworkEndPoint endPoint = NetworkEndPoint.LoopbackIpv4;     // LoopbackIpv4 == localhost
             endPoint.Port = 5522;
@@ -32,6 +36,7 @@ namespace Client
             driver.ScheduleUpdate().Complete();         // job is complete so unlock thread
             CheckAlive();
             UpdateMessagePump();
+            SendOwnEntity();
         }
         public virtual void Shutdown()
         {
@@ -44,6 +49,7 @@ namespace Client
                 Debug.Log("Something went wront, lost connection to server");
             }
         }
+        
         protected virtual void UpdateMessagePump()
         {
             DataStreamReader stream;
@@ -74,6 +80,14 @@ namespace Client
             driver.BeginSend(default(NetworkPipeline), serverConnection, out writer);
             message.Serialize(ref writer);
             driver.EndSend(writer);
+        }
+
+        private void SendOwnEntity()
+        {
+            if(playerManager.entity != null)
+            {
+                SendToServer(new NetMessage_Entity(playerManager.entity));
+            }
         }
     }
 

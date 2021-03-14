@@ -10,7 +10,7 @@ public enum EntityFlag
     position=2,
     visual=4,
 
-    all=15,
+    all = meta | position | visual
 }
 
 public enum EntityType
@@ -19,7 +19,7 @@ public enum EntityType
     npc=1
 }
 
-
+[System.Serializable]
 public class Entity
 {
     // META
@@ -85,7 +85,7 @@ public class Entity
 
     public virtual void UpdatePosition()
     {
-        if(oldPosition != Position || oldRotation != Rotation)
+        if(Position != oldPosition || Rotation != oldRotation)
         {
             oldPosition = Position;
             oldRotation = Rotation;
@@ -96,7 +96,7 @@ public class Entity
 
     public virtual void UpdateVisual()
     {
-        if(oldMaterialID != MaterialID || oldMeshID != MeshID)
+        if(MaterialID != oldMaterialID || MeshID != oldMeshID)
         {
             oldMaterialID = MaterialID;
             oldMeshID = MeshID;

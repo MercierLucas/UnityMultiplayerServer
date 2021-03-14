@@ -11,18 +11,20 @@ namespace Client
 
         private Dictionary<OpCode,NetMessageHandler> netMessagesActions;
 
-        public NetMessageHandlerManager()
+        public NetMessageHandlerManager(BaseClient client)
         {
-            SetupHandler();
+            SetupHandler(client);
         }
 
 
-        private void SetupHandler()
+        private void SetupHandler(BaseClient client)
         {
             netMessagesActions = new Dictionary<OpCode, NetMessageHandler>();
+
+            EntityMessageHandler entityMessageHandler = new EntityMessageHandler(client);
             
-            netMessagesActions.Add(OpCode.ENTITY, EntityMessageHandler.PlayerAppears);
-            netMessagesActions.Add(OpCode.PLAYER_JOIN, EntityMessageHandler.PlayerJoined);
+            netMessagesActions.Add(OpCode.ENTITY, entityMessageHandler.PlayerAppears);
+            netMessagesActions.Add(OpCode.PLAYER_JOIN, entityMessageHandler.PlayerJoined);
         }
 
         public void OnMessageReceived(DataStreamReader reader)
