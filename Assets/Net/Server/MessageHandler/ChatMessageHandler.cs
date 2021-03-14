@@ -1,11 +1,13 @@
 using Unity.Networking.Transport;
-using Server.Logs;
 
-public class ChatMessageHandler
+namespace Server
 {
-    public static void Handle(DataStreamReader reader)
+    public class ChatMessageHandler
     {
-        NetMessage_ChatMessage message = new NetMessage_ChatMessage(reader);
-        Logs.Print($"Received message {message.MessageContent}");
+        public static void Handle(DataStreamReader reader)
+        {
+            NetMessage_ChatMessage message = new NetMessage_ChatMessage(reader);
+            Logs.Print($"Received message {message.MessageContent}");
+        }
     }
 }

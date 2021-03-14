@@ -1,29 +1,28 @@
 using Unity.Networking.Transport;
-using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine;
 
-namespace Server
+namespace Client
 {
     public class NetMessageHandlerManager
     {
-        private BaseServer server;
         private delegate void NetMessageHandler(DataStreamReader reader);
+
         private Dictionary<OpCode,NetMessageHandler> netMessagesActions;
 
-        public NetMessageHandlerManager(BaseServer server)
+        public NetMessageHandlerManager()
         {
-            this.server = server;
             SetupHandler();
         }
 
+
         private void SetupHandler()
         {
-            EntityMessageHandler entityMessageHandler = new EntityMessageHandler(server);
             netMessagesActions = new Dictionary<OpCode, NetMessageHandler>();
             
-            netMessagesActions.Add(OpCode.CHAT_MESSAGE,ChatMessageHandler.Handle);
-            netMessagesActions.Add(OpCode.PLAYER_JOIN,entityMessageHandler.OnPlayerJoined);
+            netMessagesActions.Add(OpCode.ENTITY, EntityMessageHandler.PlayerAppears);
+            netMessagesActions.Add(OpCode.PLAYER_JOIN, EntityMessageHandler.PlayerJoined);
         }
 
         public void OnMessageReceived(DataStreamReader reader)
@@ -37,7 +36,7 @@ namespace Server
             }
             else
             {
-                Logs.Error($"Received unknown OPCODE: {code}");
+                Debug.Log($"Received unknown OPCODE: {code}");
             }
         }
     }
