@@ -131,10 +131,12 @@ namespace Server
 
         public int GetNextUID()
         {
-            if (players.Count == 0) return 0;
-            if (entityManager.Entities.Count == 0)
-                return players.Keys.Max() + 1;
-            
+            if (entityManager.Entities.Count == 0 && players.Count == 0)
+                return 0;
+
+            if (entityManager.Entities.Count > 0 && players.Count == 0)
+                return entityManager.Entities.Keys.Max() + 1;
+
             return Mathf.Max((int)players.Keys.Max(), (int)entityManager.Entities.Keys.Max())+1;
         }
 
