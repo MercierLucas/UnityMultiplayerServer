@@ -52,8 +52,8 @@ public class NetMessage_Entity : NetMessage
 
     public virtual void SerializeVisual(ref DataStreamWriter writer)
     {
-        writer.WriteByte(Entity.MeshID);
-        writer.WriteByte(Entity.MaterialID);
+        writer.WriteFixedString32(Entity.MeshID);
+        writer.WriteFixedString32(Entity.MaterialID);
     }
 
     #endregion
@@ -64,10 +64,10 @@ public class NetMessage_Entity : NetMessage
         EntityType type = (EntityType)reader.ReadByte();
         Entity = new Entity(uid, type);
 
-        EntityFlag dirty = (EntityFlag)reader.ReadByte();
+        Entity.Dirty = (EntityFlag)reader.ReadByte();
 
-        if(dirty.HasFlag(EntityFlag.position)) DeserializePosition(ref reader);
-        if(dirty.HasFlag(EntityFlag.visual)) DeserializeVisual(ref reader);
+        if(Entity.Dirty.HasFlag(EntityFlag.position)) DeserializePosition(ref reader);
+        if(Entity.Dirty.HasFlag(EntityFlag.visual)) DeserializeVisual(ref reader);
     }
 
     public void DeserializePosition(ref DataStreamReader reader)
@@ -89,8 +89,8 @@ public class NetMessage_Entity : NetMessage
 
     public void DeserializeVisual(ref DataStreamReader reader)
     {
-        Entity.MeshID = reader.ReadByte();
-        Entity.MaterialID = reader.ReadByte();
+        Entity.MeshID = reader.ReadFixedString32();
+        Entity.MaterialID = reader.ReadFixedString32();
     }
 
     #endregion

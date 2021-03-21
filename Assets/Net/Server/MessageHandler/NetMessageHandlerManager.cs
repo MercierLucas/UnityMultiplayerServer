@@ -24,7 +24,7 @@ namespace Server
             
             netMessagesActions.Add(OpCode.CHAT_MESSAGE,ChatMessageHandler.Handle);
             netMessagesActions.Add(OpCode.PLAYER_JOIN,entityMessageHandler.OnPlayerJoined);
-            netMessagesActions.Add(OpCode.ENTITY,entityMessageHandler.ReceiveEntity);
+            netMessagesActions.Add(OpCode.ENTITY, entityMessageHandler.ReceiveEntity);
         }
 
         public void OnMessageReceived(DataStreamReader reader)

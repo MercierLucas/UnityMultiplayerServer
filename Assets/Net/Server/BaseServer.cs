@@ -25,11 +25,12 @@ namespace Server
         private MessageSender messageSender;
         public EntityManager entityManager;
 
-        #if UNITY_EDITOR
+        //#if UNITY_EDITOR
         private void Start(){Init();}
         private void Update(){UpdateServer();}
         private void OnDestroy(){Shutdown();}
-        #endif
+        //#endif
+
 
         public virtual void Init()
         {
@@ -81,11 +82,12 @@ namespace Server
             {
                 if(!connections[i].IsCreated)
                 {
+                    Logs.Print($"Disconnect {i}");
                     connections.RemoveAtSwapBack(i);
+                    messageSender.NotifyDisconnect(i);
                     --i;
                 }
             }
-
         }
 
         private void AcceptNewConnections()
@@ -113,8 +115,9 @@ namespace Server
                     }
                     else if(cmd == NetworkEvent.Type.Disconnect)
                     {
-                        connections[i] = default(NetworkConnection);
                         Logs.Print($"A client disconnected");
+                        connections[i] = default(NetworkConnection);
+                        messageSender.NotifyDisconnect(i);  
                     }
                 }
             }
@@ -125,7 +128,7 @@ namespace Server
             int uid = GetNextUID();
             players.Add(uid,connection);
             messageSender.SendToClient(new NetMessage_JoinServer(uid),connection);
-            //entityManager.ReceiveEntity(new Entity(uid, EntityType.player));
+            messageSender.SendFullEntities(entityManager.Entities, connection);
             Logs.Print($"New client joined with id {uid}");
         }
 

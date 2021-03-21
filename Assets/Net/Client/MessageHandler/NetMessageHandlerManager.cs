@@ -11,9 +11,18 @@ namespace Client
 
         private Dictionary<OpCode,NetMessageHandler> netMessagesActions;
 
+        private LogEventChannelSO eventChannel;
+
         public NetMessageHandlerManager(BaseClient client)
         {
             SetupHandler(client);
+            eventChannel = null;
+        }
+
+        public NetMessageHandlerManager(BaseClient client, LogEventChannelSO eventChannel)
+        {
+            SetupHandler(client);
+            this.eventChannel = eventChannel;
         }
 
 
@@ -21,10 +30,11 @@ namespace Client
         {
             netMessagesActions = new Dictionary<OpCode, NetMessageHandler>();
 
-            EntityMessageHandler entityMessageHandler = new EntityMessageHandler(client);
+            EntityMessageHandler entityMessageHandler = new EntityMessageHandler(client, eventChannel);
             
             netMessagesActions.Add(OpCode.ENTITY, entityMessageHandler.PlayerAppears);
             netMessagesActions.Add(OpCode.PLAYER_JOIN, entityMessageHandler.PlayerJoined);
+            netMessagesActions.Add(OpCode.PLAYER_LEAVE, entityMessageHandler.PlayerLeaved);
         }
 
         public void OnMessageReceived(DataStreamReader reader)

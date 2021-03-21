@@ -26,5 +26,4 @@ public class NetMessage_JoinServer : NetMessage
         writer.WriteInt(UID);
     }
 
-
 }

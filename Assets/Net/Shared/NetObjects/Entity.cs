@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Unity.Networking.Transport;
+using Unity.Collections;
 
 [Flags]
 public enum EntityFlag
@@ -11,6 +12,7 @@ public enum EntityFlag
     visual=4,
 
     all = meta | position | visual
+    //all = 8
 }
 
 public enum EntityType
@@ -30,25 +32,25 @@ public class Entity
     public String Name {get; set;}
 
     // Visual
-    public byte MeshID {get;set;}
-    public byte MaterialID {get;set;}
+    public FixedString32 MeshID {get;set;}
+    public FixedString32 MaterialID {get;set;}
 
     // Position
     public Vector3 Position {get; set;}
     public Quaternion Rotation {get; set;}
 
     // Previous values
-    private byte oldMeshID;
-    private byte oldMaterialID;
-    private Vector3 oldPosition;
-    private Quaternion oldRotation;
+    private FixedString32 oldMeshID;
+    private FixedString32 oldMaterialID;
+    [SerializeField] private Vector3 oldPosition;
+    [SerializeField] private Quaternion oldRotation;
 
     public Entity(int uid, EntityType type)
     {
         UID = uid;
         Type = type;
-        MeshID = 0;
-        MaterialID = 0;
+        MeshID = "0";
+        MaterialID = "0";
 
         Position = Vector3.zero;
         Rotation = Quaternion.identity;
@@ -62,6 +64,7 @@ public class Entity
     public virtual void UpdateDirty(Entity entity)
     {
         EntityFlag dirty = entity.Dirty;
+        Dirty = dirty;
 
         if(dirty.HasFlag(EntityFlag.position))
         {
@@ -78,7 +81,7 @@ public class Entity
     public virtual void Update()
     {
         Dirty = EntityFlag.none;        // reset flag
-
+        
         if (Flags.HasFlag(EntityFlag.position)) UpdatePosition();
         if (Flags.HasFlag(EntityFlag.visual)) UpdateVisual();
     }
@@ -103,6 +106,11 @@ public class Entity
 
             Dirty |= EntityFlag.visual;
         }
+    }
+
+    public virtual void ShowDebug()
+    {
+        Debug.Log($"[Entity:{UID}] Dirty: {Dirty}");
     }
 
 }

@@ -1,13 +1,42 @@
 ## FOLDERS
 .vscode
-Assets/Scenes
 Logs/
-Packages/
 UserSettings
-
-## UNITY
-*.meta
+ProjectSettings
+Library
+Logs
+Temp
 
 ## C#
 *.csproj
 *.sln
+
+# OS Generated
+# ============
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+[Tt]humbs.db
+[Dd]esktop.ini
+
+# Visual Studio / MonoDevelop generated
+# =====================================
+[Ee]xported[Oo]bj/
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+
+# Unity generated
+# ===============
+[Oo]bj/
+[Bb]uild
+sysinfo.txt
+*.stackdump

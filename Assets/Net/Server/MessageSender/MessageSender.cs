@@ -37,12 +37,31 @@ namespace Server
 
         public virtual void PropagateEntities(Dictionary<int, Entity> entities)
         {
+            foreach (var item in entities)
+            {
+                if(!item.Value.Dirty.Equals(EntityFlag.none))
+                {
+                    NetMessage_Entity message = new NetMessage_Entity(item.Value);
+                    Broadcast(message);
+                }
+            }
+        }
 
+        public virtual void SendFullEntities(Dictionary<int, Entity> entities, NetworkConnection connection)
+        {
             foreach (var item in entities)
             {
                 NetMessage_Entity message = new NetMessage_Entity(item.Value);
-                Broadcast(message);
+                message.Entity.Dirty = EntityFlag.all;
+                SendToClient(message, connection);
             }
+        }
+
+        public void NotifyDisconnect(int uid)
+        {
+            NetMessage_Disconnect message = new NetMessage_Disconnect(uid);
+            Logs.Print($"Sending disconnect for UID {uid}");
+            Broadcast(message);
         }
     }
 }

@@ -9,14 +9,14 @@ namespace Server
         public EntityManager()
         {
             entities = new Dictionary<int, Entity>();
-            AddNPC();
+            //AddNPC();
         }
 
         private void AddNPC()
         {
             Entity npc = new Entity(0,EntityType.npc);
-            npc.MeshID = 2;
-            npc.MaterialID = 2;
+            npc.MeshID = "2";
+            npc.MaterialID = "2";
             //npc.Position.x = 1f;
 
             ReceiveEntity(npc);
@@ -26,7 +26,7 @@ namespace Server
         {
             if(entities.ContainsKey(entity.UID))
             {
-                entities[entity.UID] = entity;
+                entities[entity.UID].UpdateDirty(entity);
             }
             else
             {
